@@ -319,5 +319,4 @@ from HACS if you installed it that way.
 ## More information
 
 - [Samples](samples/): every option, ready to paste.
-- [Payload reference](docs/payload-schema.md): the full technical reference for the `data` block.
 - [Issues and feature requests](https://github.com/crosso-au/hass-toast/issues). Feedback is welcome.
