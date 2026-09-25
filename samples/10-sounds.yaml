@@ -1,0 +1,52 @@
+# Sounds
+#
+# data -> data -> audio:
+#   src      A Windows system sound (list below). Anything else is ignored and the normal
+#            notification sound plays. Your own sound files cannot be used - Windows does not
+#            allow it for this kind of app. To play your own, send the toast with
+#            silent: true and play the sound from Home Assistant.
+#   loop     true to repeat the sound while the toast is on screen. Needs a Looping sound and
+#            scenario alarm or incomingCall (or duration: long).
+#   silent   true for no sound at all.
+#
+# Sounds:
+#   ms-winsoundevent:Notification.Default
+#   ms-winsoundevent:Notification.IM
+#   ms-winsoundevent:Notification.Mail
+#   ms-winsoundevent:Notification.Reminder
+#   ms-winsoundevent:Notification.SMS
+#   ms-winsoundevent:Notification.Looping.Alarm     (and Alarm2 to Alarm10)
+#   ms-winsoundevent:Notification.Looping.Call      (and Call2 to Call10)
+
+# A different one-off sound.
+action: notify.hass_toast
+data:
+  title: New email
+  message: From the school office
+  data:
+    audio:
+      src: ms-winsoundevent:Notification.Mail
+
+---
+# No sound.
+action: notify.hass_toast
+data:
+  title: Backup finished
+  message: Nothing to worry about
+  data:
+    audio:
+      silent: true
+
+---
+# A looping alarm until dismissed.
+action: notify.hass_toast
+data:
+  title: Freezer door open
+  message: Open for 5 minutes
+  scenario: alarm
+  data:
+    audio:
+      src: ms-winsoundevent:Notification.Looping.Alarm4
+      loop: true
+    buttons:
+      - type: dismiss

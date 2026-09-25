@@ -1,0 +1,68 @@
+# Everything at once
+#
+# One toast using most of the options, as a reference for how they fit together. Each option
+# is explained in its own sample file. A real toast rarely needs more than a few of these.
+
+action: notify.hass_toast
+data:
+  message: Motion at the front door
+  title: Front door
+  target: my-pc
+  tag: front-door
+  group: security
+  scenario: reminder
+  attribution: Front door camera
+  data:
+    duration: long
+    expires_in: 1800
+    timestamp: "{{ now().isoformat() }}"
+    header:
+      id: security
+      title: Security
+    launch:
+      type: foreground
+      args:
+        action: open_camera
+    visual:
+      text:
+        - Motion at the front door
+        - Camera recorded a 12 second clip
+      app_logo:
+        src: https://picsum.photos/id/1025/96/96
+        crop: circle
+        alt: Camera thumbnail
+      hero:
+        src: https://picsum.photos/364/180
+        alt: Snapshot from the door camera
+      groups:
+        - columns:
+            - children:
+                - { text: Front door, style: captionSubtle }
+                - { text: Locked, style: base }
+            - children:
+                - { text: Porch light, style: captionSubtle }
+                - { text: "Off", style: base }
+    inputs:
+      - type: text
+        id: message
+        placeholder: Say something through the doorbell...
+    buttons:
+      - content: Speak
+        input_id: message
+        args:
+          action: doorbell_speak
+      - content: Unlock
+        args:
+          action: unlock_front_door
+        style: Success
+      - content: View live
+        activation: protocol
+        uri: https://homeassistant.local:8123/lovelace/cameras
+      - type: dismiss
+    context_menu:
+      - content: Mute this camera for an hour
+        args:
+          action: mute_camera
+          minutes: "60"
+    audio:
+      src: ms-winsoundevent:Notification.Reminder

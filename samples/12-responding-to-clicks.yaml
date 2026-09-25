@@ -1,0 +1,129 @@
+# Responding to clicks
+#
+# When someone clicks a button (or the toast itself, or a heading), the computer fires a
+# hass_toast_response event in Home Assistant. Its data looks like this:
+#
+#   device_id: my-pc                  Which computer it came from.
+#   tag: door-front                   The toast's tag ("" if it had none).
+#   group: security                   The toast's group ("" if it had none).
+#   arguments:                        The args of whatever was clicked.
+#     action: unlock_front_door
+#   inputs:                           What was typed or chosen in any inputs.
+#     reply: On my way
+#
+# Nothing is sent for snooze, dismiss, or buttons that open a web page (activation: protocol).
+#
+# To watch these events arrive: Developer tools -> Events -> "Listen to events" ->
+# hass_toast_response -> Start listening, then click a button on a toast.
+#
+# The blocks below are automations. Paste one into Settings -> Automations & scenes ->
+# Create automation -> (three dots) Edit in YAML.
+
+# Unlock the door when the Unlock button in 05-buttons.yaml is clicked.
+alias: Toast - unlock front door
+triggers:
+  - trigger: event
+    event_type: hass_toast_response
+    event_data:
+      tag: door-front
+conditions:
+  - condition: template
+    value_template: "{{ trigger.event.data.arguments.action == 'unlock_front_door' }}"
+actions:
+  - action: lock.unlock
+    target:
+      entity_id: lock.front_door
+  - action: hass_toast.remove
+    data:
+      tag: door-front
+
+---
+# Handle several buttons from one toast with a choose block.
+alias: Toast - heating choices
+triggers:
+  - trigger: event
+    event_type: hass_toast_response
+    event_data:
+      tag: heating-away
+actions:
+  - variables:
+      choice: "{{ trigger.event.data.inputs.temperature }}"
+  - choose:
+      - conditions: "{{ choice == 'off' }}"
+        sequence:
+          - action: climate.turn_off
+            target:
+              entity_id: climate.living_room
+    default:
+      - action: climate.set_temperature
+        target:
+          entity_id: climate.living_room
+        data:
+          temperature: "{{ choice | float }}"
+
+---
+# Use a typed quick reply (06-inputs.yaml) - here, forwarded to a phone.
+alias: Toast - forward reply
+triggers:
+  - trigger: event
+    event_type: hass_toast_response
+    event_data:
+      tag: message-milk
+conditions:
+  - condition: template
+    value_template: "{{ trigger.event.data.arguments.action == 'reply' }}"
+actions:
+  - action: notify.mobile_app_kitchen_tablet
+    data:
+      title: "Reply from {{ trigger.event.data.device_id }}"
+      message: "{{ trigger.event.data.inputs.reply }}"
+
+---
+# React to any button with a given action, whichever toast and computer it came from.
+alias: Toast - turn lights off
+triggers:
+  - trigger: event
+    event_type: hass_toast_response
+conditions:
+  - condition: template
+    value_template: "{{ trigger.event.data.arguments.action == 'lights_off' }}"
+actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.living_room
+
+---
+# A full round trip in one script: ask a question, then wait for the answer.
+alias: Ask before locking up
+sequence:
+  - action: notify.hass_toast
+    data:
+      title: Lock up for the night?
+      message: Front and back doors are unlocked
+      tag: lock-up
+      scenario: reminder
+      data:
+        buttons:
+          - content: Lock them
+            args:
+              action: lock_up
+            style: Success
+          - content: Not yet
+            args:
+              action: not_yet
+  - wait_for_trigger:
+      - trigger: event
+        event_type: hass_toast_response
+        event_data:
+          tag: lock-up
+    timeout: "00:10:00"
+    continue_on_timeout: false
+  - if:
+      - condition: template
+        value_template: "{{ wait.trigger.event.data.arguments.action == 'lock_up' }}"
+    then:
+      - action: lock.lock
+        target:
+          entity_id:
+            - lock.front_door
+            - lock.back_door

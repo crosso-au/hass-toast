@@ -1,0 +1,108 @@
+# Columns (adaptive layout)
+#
+# data -> data -> visual -> groups lays content out in columns, below the normal text.
+# It is also the only place text styles work (see 09-text-styles.yaml).
+#
+# groups       A list of rows. Each row is shown whole or not at all.
+#   columns    The columns in that row.
+#     weight          Relative width compared with the other columns in the row (1, 2, ...).
+#     text_stacking   top | center | bottom - vertical alignment inside the column.
+#     children        What goes in the column, top to bottom. Each child is text OR an image:
+#
+#       Text child:
+#         text        The text.
+#         style       See 09-text-styles.yaml.
+#         align       auto | left | center | right
+#         wrap        true | false
+#         max_lines   Most lines to show before cutting off.
+#         min_lines   Fewest lines to reserve.
+#
+#       Image child:
+#         src             URL, same rules as 03-images.yaml.
+#         crop            circle | none
+#         remove_margin   true to let the image touch the column edges.
+#         alt             Description for screen readers.
+
+# A four-day weather forecast.
+action: notify.hass_toast
+data:
+  title: Sheffield
+  message: Sunny intervals, 14 degrees
+  tag: weather
+  data:
+    visual:
+      attribution: Met Office
+      groups:
+        - columns:
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: Mon, style: captionSubtle, align: center }
+                - { text: "16°", style: titleNumeral, align: center }
+                - { text: "8°", style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: Tue, style: captionSubtle, align: center }
+                - { text: "14°", style: titleNumeral, align: center }
+                - { text: "7°", style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: Wed, style: captionSubtle, align: center }
+                - { text: "11°", style: titleNumeral, align: center }
+                - { text: "5°", style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: Thu, style: captionSubtle, align: center }
+                - { text: "13°", style: titleNumeral, align: center }
+                - { text: "6°", style: captionSubtle, align: center }
+
+---
+# A picture beside text, with a second row underneath.
+action: notify.hass_toast
+data:
+  title: Now playing
+  message: Living room speaker
+  data:
+    visual:
+      groups:
+        - columns:
+            - weight: 1
+              children:
+                - src: https://picsum.photos/id/1062/96/96
+                  crop: none
+                  remove_margin: true
+                  alt: Album art
+            - weight: 3
+              text_stacking: center
+              children:
+                - { text: Harvest Moon, style: base }
+                - { text: Neil Young, style: captionSubtle }
+        - columns:
+            - children:
+                - text: Next up - Heart of Gold, then Old Man
+                  style: captionSubtle
+                  wrap: true
+                  max_lines: 2
+
+---
+# Using entity states in a table.
+action: notify.hass_toast
+data:
+  title: House status
+  message: "{{ now().strftime('%H:%M') }}"
+  data:
+    visual:
+      groups:
+        - columns:
+            - children:
+                - { text: Inside, style: captionSubtle }
+                - { text: "{{ states('sensor.living_room_temperature') }}°", style: subtitle }
+            - children:
+                - { text: Outside, style: captionSubtle }
+                - { text: "{{ states('sensor.outdoor_temperature') }}°", style: subtitle }
+            - children:
+                - { text: Doors, style: captionSubtle }
+                - { text: "{{ 'Locked' if is_state('lock.front_door', 'locked') else 'Unlocked' }}", style: subtitle }

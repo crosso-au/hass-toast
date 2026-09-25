@@ -1,0 +1,50 @@
+# Basic notifications
+#
+# Paste any one block (between the --- lines) into Home Assistant:
+#   Developer tools -> Actions -> "Go to YAML mode"
+# or use it as an action in an automation or script.
+#
+# notify.hass_toast fields:
+#   message      required   The main text of the toast.
+#   title        optional   Bold first line, shown above the message.
+#   target       optional   Device id of the computer to send to, or a list of them.
+#                           Leave it out to send to every computer you have set up.
+#                           The device id is the one you chose in setup (it is also the
+#                           name of the entry under Settings -> Devices & services).
+
+# The simplest possible toast.
+action: notify.hass_toast
+data:
+  message: The washing machine has finished.
+
+---
+# With a title.
+action: notify.hass_toast
+data:
+  title: Washing machine
+  message: The cycle has finished.
+
+---
+# To one computer only. Replace my-pc with your device id.
+action: notify.hass_toast
+data:
+  title: Washing machine
+  message: The cycle has finished.
+  target: my-pc
+
+---
+# To several computers.
+action: notify.hass_toast
+data:
+  title: Washing machine
+  message: The cycle has finished.
+  target:
+    - my-pc
+    - office-laptop
+
+---
+# Using templates, as in any Home Assistant action.
+action: notify.hass_toast
+data:
+  title: "Front door {{ states('lock.front_door') }}"
+  message: "Changed at {{ now().strftime('%H:%M') }}"

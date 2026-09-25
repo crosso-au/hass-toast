@@ -1,0 +1,94 @@
+# Buttons
+#
+# data -> data -> buttons is a list of up to 5 buttons (shared with context_menu, below).
+#
+# Each button:
+#   content      The button's label.
+#   args         Any key/value pairs you like. They are sent back to Home Assistant when the
+#                button is clicked, in the hass_toast_response event - see
+#                12-responding-to-clicks.yaml for automations that act on them.
+#   style        Success (green) | Critical (red). Windows 11 only.
+#   activation   foreground (default) | background | protocol
+#                  foreground / background   send the click back to Home Assistant.
+#                  protocol                  open "uri" instead. Nothing is sent back.
+#   uri          The web address to open, for activation: protocol. Only https, http and
+#                mailto are allowed unless you change security.allowedUriSchemes on the computer.
+#   input_id     Places the button beside a text box - see 06-inputs.yaml.
+#   icon         URL of a small icon (16x16, white on transparent) shown instead of text.
+#                If any button has an icon, every button must, or the icons are ignored.
+#   tooltip      Hover text. The only label an icon-only button has.
+#   type         snooze | dismiss - buttons handled by Windows itself, labelled in your
+#                language automatically. Clicks on these are not sent to Home Assistant.
+#
+# data -> data -> context_menu takes the same fields. Those entries appear when the toast is
+# right-clicked in the notification centre, instead of as buttons.
+
+# Coloured buttons that report back to Home Assistant.
+action: notify.hass_toast
+data:
+  title: Someone is at the front door
+  message: Motion detected 10 seconds ago
+  tag: door-front
+  data:
+    buttons:
+      - content: Unlock
+        args:
+          action: unlock_front_door
+        style: Success
+      - content: Ignore
+        args:
+          action: ignore
+        style: Critical
+
+---
+# A button that opens a web page, plus the Windows snooze and dismiss buttons.
+action: notify.hass_toast
+data:
+  title: Printer is low on toner
+  message: Black cartridge at 5%
+  scenario: reminder
+  data:
+    buttons:
+      - content: Order toner
+        activation: protocol
+        uri: https://www.example.com/toner
+      - type: snooze
+      - type: dismiss
+
+---
+# Right-click menu entries.
+action: notify.hass_toast
+data:
+  title: Front camera
+  message: Motion detected
+  tag: camera-front
+  data:
+    buttons:
+      - content: View
+        activation: protocol
+        uri: https://homeassistant.local:8123/lovelace/cameras
+    context_menu:
+      - content: Mute this camera for an hour
+        args:
+          action: mute_camera
+          minutes: "60"
+
+---
+# Icon buttons. Every button needs an icon for this to work. The icons used here are in this
+# repository's samples/icons folder; host your own anywhere the computer can reach.
+action: notify.hass_toast
+data:
+  title: Living room lights
+  message: Still on, nobody home
+  data:
+    buttons:
+      - content: Turn off
+        icon: https://raw.githubusercontent.com/crosso-au/hass-toast/main/samples/icons/light-off.png
+        tooltip: Turn off
+        args:
+          action: lights_off
+      - content: Leave on
+        icon: https://raw.githubusercontent.com/crosso-au/hass-toast/main/samples/icons/close.png
+        tooltip: Leave on
+        args:
+          action: lights_leave

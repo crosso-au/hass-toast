@@ -1,0 +1,73 @@
+# Progress bars
+#
+# data -> data -> visual -> progress:
+#   status           required   Text under the bar, e.g. "Downloading...".
+#   value            optional   A number from 0 to 1 (0.42 = 42%), or "indeterminate" for a
+#                               moving bar with no percentage. Leaving it out also means
+#                               indeterminate.
+#   title            optional   Text above the bar.
+#   value_override   optional   Replaces the percentage shown, e.g. "42 of 100 GB".
+#
+# To move the bar along later without a new pop-up each time, give the toast a tag and use
+# hass_toast.update (below). The toast keeps its place and does not pop up again.
+
+# 1. Start the progress bar.
+action: notify.hass_toast
+data:
+  title: Nightly backup running
+  message: Copying to the NAS
+  tag: backup-nightly
+  group: maintenance
+  data:
+    visual:
+      progress:
+        title: Documents
+        value: 0.1
+        value_override: 10 of 100 GB
+        status: Uploading...
+
+---
+# 2. Move it along. tag (and group, if the toast has one) must match the original.
+#    progress accepts the same fields as above.
+action: hass_toast.update
+data:
+  tag: backup-nightly
+  group: maintenance
+  progress:
+    value: 0.8
+    value_override: 80 of 100 GB
+    status: Uploading...
+
+---
+# 3. Finish it.
+action: hass_toast.update
+data:
+  tag: backup-nightly
+  group: maintenance
+  progress:
+    value: 1
+    value_override: 100 GB
+    status: Complete
+
+---
+# An indeterminate bar, for work with no known length.
+action: notify.hass_toast
+data:
+  title: Rebuilding the media index
+  message: This usually takes a few minutes
+  tag: media-reindex
+  data:
+    visual:
+      progress:
+        title: Scanning
+        value: indeterminate
+        status: Working...
+
+---
+# Driving the bar from an entity, e.g. a download sensor reporting 0-100.
+action: hass_toast.update
+data:
+  tag: media-reindex
+  progress:
+    value: "{{ states('sensor.download_progress') | float(0) / 100 }}"
+    status: "{{ states('sensor.download_status') }}"

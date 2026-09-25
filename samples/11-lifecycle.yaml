@@ -1,0 +1,115 @@
+# Replacing, removing and timing toasts
+#
+# Options under data -> data:
+#   tag              Name for the toast (also a top-level field). Sending again with the same
+#                    tag replaces it instead of adding a second toast.
+#   group            Group name (also a top-level field).
+#   expires_in       Seconds before Windows removes it from the notification centre.
+#   suppress_popup   true to put it straight into the notification centre with no pop-up.
+#   timestamp        When the event really happened, e.g. "2026-09-25T14:02:00+10:00".
+#                    Shown instead of the time the toast arrived.
+#   header           Groups toasts under a heading in the notification centre:
+#                      id      required   Toasts with the same id share a heading.
+#                      title   required   The heading text.
+#                      args    optional   Sent back to Home Assistant when the heading is clicked.
+#   launch           What clicking the toast itself (not a button) does:
+#                      type: foreground   Send "args" back to Home Assistant (the default).
+#                      type: protocol     Open "uri" instead.
+#
+# Actions:
+#   hass_toast.remove   Remove toasts by tag, by group, or both. target is optional.
+#   hass_toast.clear    Remove every toast this integration has shown on a computer.
+#                       Without target this clears EVERY computer.
+
+# Replaced in place: run this twice and there is still only one toast.
+action: notify.hass_toast
+data:
+  title: Garage door
+  message: "{{ states('cover.garage_door') }}"
+  tag: garage-door
+
+---
+# Removes itself from the notification centre after 10 minutes.
+action: notify.hass_toast
+data:
+  title: Someone rang the doorbell
+  message: 2 minutes ago
+  data:
+    expires_in: 600
+
+---
+# Silent delivery to the notification centre only.
+action: notify.hass_toast
+data:
+  title: Daily energy report
+  message: 12.4 kWh used yesterday
+  data:
+    suppress_popup: true
+    audio:
+      silent: true
+
+---
+# Shows the time the event happened rather than when the toast arrived.
+action: notify.hass_toast
+data:
+  title: Motion in the garden
+  message: Recorded while you were away
+  data:
+    timestamp: "{{ as_datetime(states.binary_sensor.garden_motion.last_changed).isoformat() }}"
+
+---
+# Several toasts under one heading.
+action: notify.hass_toast
+data:
+  title: Front door opened
+  message: 18:02
+  group: security
+  data:
+    header:
+      id: security
+      title: Security
+      args:
+        action: open_security
+
+---
+# Clicking the toast opens a web page.
+action: notify.hass_toast
+data:
+  title: New camera clip
+  message: Click to watch
+  data:
+    launch:
+      type: protocol
+      uri: https://homeassistant.local:8123/media-browser
+
+---
+# Clicking the toast sends these args back to Home Assistant (see 12-responding-to-clicks.yaml).
+action: notify.hass_toast
+data:
+  title: Laundry done
+  message: Click to mark it as handled
+  tag: laundry
+  data:
+    launch:
+      type: foreground
+      args:
+        action: laundry_seen
+
+---
+# Remove one toast.
+action: hass_toast.remove
+data:
+  tag: garage-door
+
+---
+# Remove a whole group from one computer.
+action: hass_toast.remove
+data:
+  target: my-pc
+  group: security
+
+---
+# Remove everything this integration has shown on one computer.
+action: hass_toast.clear
+data:
+  target: my-pc

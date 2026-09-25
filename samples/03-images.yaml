@@ -1,0 +1,68 @@
+# Images
+#
+# Three places a picture can go, all under data -> data -> visual:
+#
+#   app_logo   Small image on the left, replacing the app icon. crop: circle makes it round,
+#              which suits people and cameras. Max 200 KB.
+#   hero       Large banner across the top of the toast. Max 200 KB.
+#              (The top-level "image:" field is a shortcut for this.)
+#   inline     Full-width picture below the text. Max 3 MB - use this one for camera
+#              snapshots, which are usually bigger than 200 KB.
+#
+# Each takes:
+#   src    required   An http:// or https:// URL. PNG, JPG, GIF, WebP or BMP.
+#   crop   optional   circle | none   (app_logo and inline only)
+#   alt    optional   Description for screen readers.
+#
+# The URL is downloaded by your computer, not by Home Assistant, so it must be reachable from
+# the computer and must not need a login. Images that are too big, not a picture, or blocked
+# are left out; the rest of the toast still appears.
+#
+# Tip - Home Assistant cameras: entity_picture includes a short-lived access token, so this
+# works without a login. Replace the address with your own Home Assistant URL.
+#   src: "https://homeassistant.local:8123{{ state_attr('camera.front_door', 'entity_picture') }}"
+#
+# Tip - files in your Home Assistant config/www folder are served at /local/ without a login:
+#   src: https://homeassistant.local:8123/local/snapshots/front_door.jpg
+
+# Round logo and a banner.
+action: notify.hass_toast
+data:
+  message: Camera recorded a 12 second clip
+  data:
+    visual:
+      text:
+        - Motion at the front door
+        - Camera recorded a 12 second clip
+      attribution: Front door camera
+      app_logo:
+        src: https://picsum.photos/id/1025/96/96
+        crop: circle
+        alt: Camera thumbnail
+      hero:
+        src: https://picsum.photos/364/180
+        alt: Snapshot from the door camera
+
+---
+# A large picture below the text.
+action: notify.hass_toast
+data:
+  title: Parcel delivered
+  message: Left on the doorstep at 14:02
+  data:
+    visual:
+      inline:
+        src: https://picsum.photos/600/340
+        alt: Doorstep camera snapshot
+
+---
+# A live Home Assistant camera snapshot. Change the address and camera entity to your own.
+action: notify.hass_toast
+data:
+  title: Someone is at the door
+  message: Snapshot from the doorbell
+  data:
+    visual:
+      inline:
+        src: "https://homeassistant.local:8123{{ state_attr('camera.doorbell', 'entity_picture') }}"
+        alt: Doorbell snapshot

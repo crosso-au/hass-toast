@@ -1,0 +1,45 @@
+# Text styles
+#
+# Styles only work on text inside columns (see 08-columns.yaml). Windows ignores them on the
+# normal title/message lines.
+#
+# style values (not case sensitive):
+#   caption      captionSubtle
+#   body         bodySubtle
+#   base         baseSubtle
+#   subtitle     subtitleSubtle
+#   title        titleSubtle      titleNumeral
+#   subheader    subheaderSubtle  subheaderNumeral
+#   header       headerSubtle     headerNumeral
+#
+# "Subtle" is the same size in a lighter colour. "Numeral" tightens the spacing for numbers.
+# An unknown style is ignored and the text shows in the normal style.
+
+# Every style, in two columns.
+action: notify.hass_toast
+data:
+  message: Text style reference
+  data:
+    visual:
+      text:
+        - Text style reference
+      groups:
+        - columns:
+            - weight: 1
+              children:
+                - { text: caption, style: caption }
+                - { text: captionSubtle, style: captionSubtle }
+                - { text: body, style: body }
+                - { text: bodySubtle, style: bodySubtle }
+                - { text: base, style: base }
+                - { text: baseSubtle, style: baseSubtle }
+                - { text: subtitle, style: subtitle }
+                - { text: subtitleSubtle, style: subtitleSubtle }
+            - weight: 1
+              children:
+                - { text: title, style: title }
+                - { text: titleSubtle, style: titleSubtle }
+                - { text: "42 titleNumeral", style: titleNumeral }
+                - { text: subheader, style: subheader }
+                - { text: "42", style: subheaderNumeral }
+                - { text: header, style: header }

@@ -1,0 +1,25 @@
+# Quick options
+#
+# These are available as ordinary fields on notify.hass_toast, so they also appear in the
+# automation editor's visual mode. Everything else lives under the nested "data:" block,
+# shown in the later samples.
+#
+#   tag          Names this toast so it can be replaced, updated or removed later.
+#                Sending again with the same tag replaces the old toast instead of adding a
+#                second one. Up to 64 characters.
+#   group        Groups toasts together, so a whole group can be removed at once.
+#   scenario     default | reminder | alarm | incomingCall | urgent (see 04-scenarios.yaml)
+#   image        URL of a large picture shown across the top of the toast.
+#   attribution  Small grey line at the bottom, e.g. where the notification came from.
+#
+# If the same option is also given inside "data:", the one inside "data:" wins.
+
+action: notify.hass_toast
+data:
+  title: Motion at the front door
+  message: Camera recorded a 12 second clip
+  tag: front-door
+  group: security
+  scenario: default
+  image: https://picsum.photos/364/180
+  attribution: Front door camera

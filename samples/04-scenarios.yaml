@@ -1,0 +1,86 @@
+# Scenarios and duration
+#
+# scenario (top-level field, or data -> data -> scenario):
+#   default       An ordinary toast. Shows for a few seconds, then goes to the notification centre.
+#   reminder      Stays on screen until you act on it.
+#   alarm         Stays on screen and plays a looping alarm sound.
+#   incomingCall  Stays on screen, full size, with a ringtone. Made for calls.
+#   urgent        Can break through Do Not Disturb, if you allow it for this app in
+#                 Windows Settings -> System -> Notifications. Windows 11 only.
+#
+# reminder, alarm and incomingCall need at least one button, otherwise Windows quietly shows an
+# ordinary toast instead. If you give none, a Dismiss button is added for you.
+#
+# duration (data -> data -> duration):
+#   short   About 5 seconds (the default).
+#   long    About 25 seconds.
+
+# A reminder that stays until handled.
+action: notify.hass_toast
+data:
+  title: Bins go out tonight
+  message: Recycling week
+  scenario: reminder
+  data:
+    buttons:
+      - content: Done
+        args:
+          action: bins_done
+      - type: dismiss
+
+---
+# An alarm with a looping sound.
+action: notify.hass_toast
+data:
+  title: Water leak detected
+  message: Sensor under the kitchen sink
+  scenario: alarm
+  data:
+    audio:
+      src: ms-winsoundevent:Notification.Looping.Alarm2
+      loop: true
+    buttons:
+      - content: Shut off water
+        args:
+          action: water_off
+        style: Critical
+      - type: dismiss
+
+---
+# An incoming call.
+action: notify.hass_toast
+data:
+  title: Front door
+  message: Someone pressed the doorbell
+  scenario: incomingCall
+  data:
+    visual:
+      app_logo:
+        src: https://picsum.photos/id/1025/96/96
+        crop: circle
+    buttons:
+      - content: Answer
+        args:
+          action: answer_door
+        style: Success
+      - content: Ignore
+        args:
+          action: ignore_door
+        style: Critical
+
+---
+# Urgent: can break through Do Not Disturb (Windows 11, if allowed in Windows settings).
+action: notify.hass_toast
+data:
+  title: Smoke alarm
+  message: Kitchen smoke detector triggered
+  scenario: urgent
+
+---
+# An ordinary toast that stays on screen longer.
+action: notify.hass_toast
+data:
+  title: Dishwasher finished
+  message: Ready to unload
+  data:
+    duration: long

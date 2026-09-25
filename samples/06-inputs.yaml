@@ -1,0 +1,98 @@
+# Text boxes and drop-down lists
+#
+# data -> data -> inputs is a list of up to 5 inputs. Whatever the user enters is sent back to
+# Home Assistant with the button they click, in the "inputs" part of the hass_toast_response
+# event (see 12-responding-to-clicks.yaml).
+#
+# Text box:
+#   type          text
+#   id            required   Name the value comes back under.
+#   title         optional   Label above the box.
+#   placeholder   optional   Grey hint text shown while the box is empty.
+#   default       optional   Text already filled in.
+#
+# Drop-down list:
+#   type          selection
+#   id            required   Name the chosen item's id comes back under.
+#   title         optional   Label above the list.
+#   default       optional   id of the item selected to begin with.
+#   items         up to 5 of:  { id: ..., content: label shown }
+#
+# A button with input_id: <an input's id> sits right next to that input, giving a
+# "quick reply" layout.
+
+# Quick reply: a text box with a Send button beside it.
+action: notify.hass_toast
+data:
+  title: Message from the kitchen tablet
+  message: Are you still picking up milk?
+  tag: message-milk
+  data:
+    inputs:
+      - type: text
+        id: reply
+        placeholder: Type a reply...
+    buttons:
+      - content: Send
+        input_id: reply
+        args:
+          action: reply
+
+---
+# A drop-down list and a titled text box.
+action: notify.hass_toast
+data:
+  title: Heating
+  message: Nobody is home but the heating is on.
+  tag: heating-away
+  data:
+    inputs:
+      - type: selection
+        id: temperature
+        title: Set the temperature to
+        default: "16"
+        items:
+          - id: "14"
+            content: 14 °C
+          - id: "16"
+            content: 16 °C
+          - id: "18"
+            content: 18 °C
+          - id: "off"
+            content: Turn it off
+      - type: text
+        id: note
+        title: Note for the log
+        default: Set from my PC
+    buttons:
+      - content: Apply
+        args:
+          action: set_heating
+        style: Success
+      - type: dismiss
+
+---
+# A snooze button that uses a drop-down for the snooze length. Windows handles the snooze
+# itself; the ids are minutes.
+action: notify.hass_toast
+data:
+  title: Take the bins out
+  message: Collection is tomorrow morning
+  scenario: reminder
+  data:
+    inputs:
+      - type: selection
+        id: snooze_for
+        title: Remind me again in
+        default: "15"
+        items:
+          - id: "5"
+            content: 5 minutes
+          - id: "15"
+            content: 15 minutes
+          - id: "60"
+            content: 1 hour
+    buttons:
+      - type: snooze
+        input_id: snooze_for
+      - type: dismiss
