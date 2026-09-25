@@ -70,4 +70,3 @@ the Windows-specific options.
 If you set `visual.text`, it replaces `title` and `message` as the toast's lines. `message` is
 still required by the action, so keep it.
 
-The full technical reference is [docs/payload-schema.md](../docs/payload-schema.md).
