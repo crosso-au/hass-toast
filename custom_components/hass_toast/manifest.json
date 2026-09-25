@@ -1,0 +1,13 @@
+{
+  "domain": "hass_toast",
+  "name": "HASS Windows Toast",
+  "codeowners": ["@crosso-au"],
+  "config_flow": true,
+  "dependencies": ["notify"],
+  "documentation": "https://github.com/crosso-au/hass-toast",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/crosso-au/hass-toast/issues",
+  "requirements": [],
+  "version": "2.0.0"
+}

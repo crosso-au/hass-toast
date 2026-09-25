@@ -1,0 +1,73 @@
+update:
+  name: Update a toast
+  description: >-
+    Advance an existing toast's progress bar in place. Unlike sending again, this keeps the
+    notification where it is in the Action Center and raises no new banner, which is what
+    makes frequent progress updates tolerable rather than a stream of interruptions.
+  fields:
+    target:
+      name: Device
+      description: >-
+        Device id to update. Omit to reach every configured machine.
+      example: ryan-desktop
+      selector:
+        text:
+    tag:
+      name: Tag
+      description: Tag of the toast to update. Must match the tag it was sent with.
+      required: true
+      example: backup-nightly
+      selector:
+        text:
+    group:
+      name: Group
+      description: Group the toast belongs to, if it was sent with one.
+      example: maintenance
+      selector:
+        text:
+    progress:
+      name: Progress
+      description: >-
+        New progress values. Accepts title, value (0-1 or "indeterminate"), status and
+        value_override.
+      required: true
+      example: '{"value": 0.8, "status": "Uploading..."}'
+      selector:
+        object:
+
+remove:
+  name: Remove a toast
+  description: Pull a toast out of the Action Center. Give a tag, a group, or both.
+  fields:
+    target:
+      name: Device
+      description: >-
+        Device id to remove from. Omit to reach every configured machine.
+      example: ryan-desktop
+      selector:
+        text:
+    tag:
+      name: Tag
+      description: Tag of the toast to remove.
+      example: backup-nightly
+      selector:
+        text:
+    group:
+      name: Group
+      description: Remove every toast in this group. Can be used on its own.
+      example: maintenance
+      selector:
+        text:
+
+clear:
+  name: Clear all toasts
+  description: Remove every notification this integration has raised on a machine.
+  fields:
+    target:
+      name: Device
+      description: >-
+        Device id to clear. Omit to clear EVERY configured machine, not just one.
+        The fan-out is written to the Home Assistant log when more than one is configured.
+      example: ryan-desktop
+      selector:
+        text:

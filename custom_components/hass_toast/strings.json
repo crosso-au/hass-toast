@@ -1,0 +1,35 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a Windows machine",
+        "description": "The setup wizard on the Windows machine fills this in for you. To add a machine by hand, run `hass-toast --show-key` on it to read its signing key, and use the same device id the agent is configured with.",
+        "data": {
+          "device_id": "Device id",
+          "signing_key": "Signing key"
+        },
+        "data_description": {
+          "device_id": "Must match the agent's device id exactly; it is how the agent recognises envelopes meant for it.",
+          "signing_key": "The base64 key printed by --show-key. Envelopes are signed with it so no other component can forge toasts."
+        }
+      },
+      "reconfigure": {
+        "title": "Replace the signing key",
+        "description": "Paste the new key for {device_id}. Run `hass-toast --rotate-key` on that machine to generate one, then restart the agent so it picks up the change.",
+        "data": {
+          "signing_key": "Signing key"
+        },
+        "data_description": {
+          "signing_key": "The base64 key printed by --rotate-key. The device id cannot be changed here — a different machine is a new entry."
+        }
+      }
+    },
+    "error": {
+      "invalid_key": "That is not a valid signing key. It should be the base64 value printed by `hass-toast --show-key`, decoding to 32 bytes."
+    },
+    "abort": {
+      "already_configured": "That device id is already configured.",
+      "reconfigure_successful": "The signing key was replaced. Restart the agent on that machine if you have not already."
+    }
+  }
+}
