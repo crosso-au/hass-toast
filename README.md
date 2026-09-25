@@ -128,6 +128,7 @@ Everything beyond the fields above goes in the nested `data:` block. The
 | A different sound, a looping alarm, or silence | [10-sounds.yaml](samples/10-sounds.yaml) |
 | Expiring, silent delivery, headings, clicking the notification | [11-lifecycle.yaml](samples/11-lifecycle.yaml) |
 | All of it at once | [13-everything.yaml](samples/13-everything.yaml) |
+| An animated GIF as the banner image | [14-animated-hero.yaml](samples/14-animated-hero.yaml) |
 
 For example, a notification with a picture and two buttons:
 
