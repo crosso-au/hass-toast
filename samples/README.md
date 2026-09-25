@@ -34,6 +34,7 @@ computer.
 | [11-lifecycle.yaml](11-lifecycle.yaml) | Replacing, expiring and removing toasts, headings, and clicking the toast itself |
 | [12-responding-to-clicks.yaml](12-responding-to-clicks.yaml) | Automations that act on button clicks and typed replies |
 | [13-everything.yaml](13-everything.yaml) | One toast using most options together |
+| [14-animated-hero.yaml](14-animated-hero.yaml) | An animated GIF as the banner image |
 
 ## Where the options go
 
