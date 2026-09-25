@@ -1,0 +1,29 @@
+# Animated hero image
+#
+# An animated GIF as the large banner across the top of the toast. It plays for as long as the
+# toast is on screen.
+#
+# The image is downloaded by the computer showing the toast, so it has to be under the hero
+# size limit of 200 KB, and reachable from that computer without a login. This one is 174 KB,
+# 364 x 180 - the size Windows recommends for a hero image.
+#
+# A GitHub "?raw=true" link like this one works: the computer follows GitHub's redirect to the
+# file itself.
+
+action: notify.hass_toast
+data:
+  title: HASS Windows Toast
+  message: Rich notifications from Home Assistant
+  data:
+    visual:
+      hero:
+        src: https://github.com/crosso-au/hass-toast/blob/main/samples/images/hass-toast-hero.gif?raw=true
+        alt: HASS Windows Toast
+
+---
+# The same, using the image shortcut field instead.
+action: notify.hass_toast
+data:
+  title: HASS Windows Toast
+  message: Rich notifications from Home Assistant
+  image: https://github.com/crosso-au/hass-toast/blob/main/samples/images/hass-toast-hero.gif?raw=true
