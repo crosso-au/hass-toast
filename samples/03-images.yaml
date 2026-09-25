@@ -11,6 +11,7 @@
 #
 # Each takes:
 #   src    required   An http:// or https:// URL. PNG, JPG, GIF, WebP or BMP.
+#                     Animated GIFs play, as long as they are under the size limit.
 #   crop   optional   circle | none   (app_logo and inline only)
 #   alt    optional   Description for screen readers.
 #
@@ -42,6 +43,18 @@ data:
       hero:
         src: https://picsum.photos/364/180
         alt: Snapshot from the door camera
+
+---
+# An animated banner. It plays for as long as the toast is on screen.
+action: notify.hass_toast
+data:
+  title: HASS Windows Toast
+  message: Rich notifications from Home Assistant
+  data:
+    visual:
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/samples/images/hass-toast-hero.gif
+        alt: HASS Windows Toast
 
 ---
 # A large picture below the text.

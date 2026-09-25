@@ -1,0 +1,679 @@
+# Welcome toasts
+#
+# Five introductions to HASS Windows Toast, each showing off most of what a toast can do in one
+# notification.
+#
+# 1. Feature tour: an animated banner, the app logo, a styled three-column feature row,
+#    coloured buttons that open web pages, a right-click menu entry and a reminder that stays
+#    on screen.
+# 2. "You're all set": a completed progress bar, a row of big numbers, a round logo and a
+#    link to the guide.
+# 3. Say hello back: a drop-down list and a text box whose answers go back to Home Assistant,
+#    with the automation (4) that replies with a toast of its own.
+# 5. Your home right now: a live snapshot built from templates - lights on, people home,
+#    automations, the sun, and a bar showing how much of the day has gone.
+# 6. Installing: a script that fills a progress bar step by step and ends on "Install complete".
+#
+# First-run toasts, for the moment setup finishes - no automations or entity names needed:
+# 7. It works!: the route the toast just took, from Home Assistant to this PC.
+# 8. Good evening: a time-of-day greeting and a three-step quick start.
+# 9. Less is more: just the banner, one line and one button.
+# 10. Self-test: a script whose progress bar checks send, update, clear and signing, then
+#     shows the thank-you (11) and the quick start (8). The installer runs this same sequence.
+# 11. Thank you: a simple thank-you from CrossboxLabs with a Star on GitHub button.
+
+# 1. Feature tour
+action: notify.hass_toast
+data:
+  message: Rich, secure Windows notifications from Home Assistant.
+  data:
+    # Stays on screen until the user picks a button, instead of fading after a few seconds.
+    scenario: reminder
+    visual:
+      text:
+        - Welcome to HASS Windows Toast
+        - Rich, secure Windows notifications, straight from Home Assistant.
+        - Built for the Home Assistant community.
+      attribution: CrossboxLabs
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        alt: HASS Windows Toast logo
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: HASS Windows Toast
+      groups:
+        - columns:
+            - weight: 1
+              children:
+                - { text: Rich, style: base, align: center }
+                - { text: "Images, buttons, progress", style: captionSubtle, align: center, wrap: true }
+            - weight: 1
+              children:
+                - { text: Two-way, style: base, align: center }
+                - { text: Clicks and replies back to HA, style: captionSubtle, align: center, wrap: true }
+            - weight: 1
+              children:
+                - { text: Secure, style: base, align: center }
+                - { text: "Signed, no open ports", style: captionSubtle, align: center, wrap: true }
+    buttons:
+      - content: Explore samples
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+        style: Success
+      - content: Star on GitHub
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast
+      - type: dismiss
+    context_menu:
+      - content: Report an issue
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/issues
+
+---
+# 2. "You're all set"
+action: notify.hass_toast
+data:
+  message: HASS Windows Toast is installed and connected to Home Assistant.
+  data:
+    scenario: reminder
+    visual:
+      text:
+        - You're all set!
+        - HASS Windows Toast is installed and connected to Home Assistant.
+      attribution: CrossboxLabs
+      # crop: circle turns the logo round, the usual look for a person or an app avatar.
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        crop: circle
+        alt: HASS Windows Toast logo
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: HASS Windows Toast
+      # A full bar reads as "done". value_override replaces the percentage with a word.
+      progress:
+        title: Setup
+        value: 1
+        value_override: Complete
+        status: Connected to Home Assistant
+      # Numeral styles are made for big numbers.
+      groups:
+        - columns:
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: "15", style: titleNumeral, align: center }
+                - { text: Samples to try, style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: "5", style: titleNumeral, align: center }
+                - { text: Buttons per toast, style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: "0", style: titleNumeral, align: center }
+                - { text: Open ports, style: captionSubtle, align: center }
+    buttons:
+      - content: Try the samples
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+        style: Success
+      - content: Read the guide
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast#readme
+      - type: dismiss
+    context_menu:
+      - content: Report an issue
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/issues
+
+---
+# 3. Say hello back
+#
+# The two-way demo: a drop-down list and a text box, with the answers sent back to Home
+# Assistant when Send is pressed. Add the automation below (block 4) first, so something is
+# listening for the reply.
+action: notify.hass_toast
+data:
+  message: This toast talks back.
+  tag: welcome-hello
+  data:
+    scenario: reminder
+    # Files it under a "HASS Windows Toast" heading in the notification centre.
+    header:
+      id: hass-toast
+      title: HASS Windows Toast
+    visual:
+      text:
+        - Say hello to Home Assistant
+        - This toast talks back. Pick an answer, add a note and press Send.
+      attribution: CrossboxLabs
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        crop: circle
+        alt: HASS Windows Toast logo
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: HASS Windows Toast
+    inputs:
+      - type: selection
+        id: first
+        title: What will you automate first?
+        default: doorbell
+        items:
+          - { id: doorbell, content: Doorbell and cameras }
+          - { id: alerts, content: Alarms and alerts }
+          - { id: energy, content: Energy and appliances }
+          - { id: reminders, content: Reminders around the house }
+      - type: text
+        id: note
+        placeholder: Anything you'd like to say?
+    buttons:
+      # input_id sits Send right beside the text box.
+      - content: Send
+        input_id: note
+        args:
+          action: hello
+        style: Success
+      - type: dismiss
+    audio:
+      src: ms-winsoundevent:Notification.IM
+
+---
+# 4. The automation that answers variant 3
+#
+# Paste into Settings -> Automations & scenes -> Create automation -> (three dots) -> Edit in
+# YAML. It records the answer in Home Assistant's notifications, then replies with a toast on
+# the same computer, so both directions can be seen working.
+alias: HASS Windows Toast - say hello back
+triggers:
+  - trigger: event
+    event_type: hass_toast_response
+    event_data:
+      tag: welcome-hello
+conditions:
+  - condition: template
+    value_template: "{{ trigger.event.data.arguments.action == 'hello' }}"
+actions:
+  - variables:
+      device: "{{ trigger.event.data.device_id }}"
+      choice: >-
+        {{ {'doorbell': 'doorbell and cameras', 'alerts': 'alarms and alerts',
+            'energy': 'energy and appliances', 'reminders': 'reminders around the house'}
+           .get(trigger.event.data.inputs.first, 'something good') }}
+      note: "{{ trigger.event.data.inputs.note | default('', true) }}"
+  - action: persistent_notification.create
+    data:
+      title: "Hello from {{ device }}"
+      message: >-
+        First up: {{ choice }}.{% if note %} They said: "{{ note }}"{% endif %}
+  - action: notify.hass_toast
+    data:
+      target: "{{ device }}"
+      title: Home Assistant heard you
+      message: "Great choice - {{ choice }}. Check Settings, then Notifications, to see your reply."
+      tag: welcome-hello-reply
+      attribution: Home Assistant
+
+---
+# 5. Your home right now
+#
+# A live snapshot of this Home Assistant, built from templates that work on any install: how
+# many lights are on, who is home, how many automations are active, sunrise and sunset, and
+# how far through the day it is. Nothing needs changing except the Home Assistant address on
+# the Open button.
+action: notify.hass_toast
+data:
+  message: A live snapshot from Home Assistant.
+  tag: welcome-glance
+  data:
+    duration: long
+    # Shows when the snapshot was taken rather than when the toast arrived.
+    timestamp: "{{ now().isoformat() }}"
+    header:
+      id: hass-toast
+      title: HASS Windows Toast
+    visual:
+      text:
+        - Your home right now
+        - "{{ now().strftime('%A %d %B, %H:%M') }}"
+      attribution: Live from Home Assistant
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        crop: circle
+        alt: HASS Windows Toast logo
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: HASS Windows Toast
+      # How much of the day has gone, as a bar.
+      progress:
+        title: Today
+        value: "{{ ((now().hour * 60 + now().minute) / 1440) | round(2) }}"
+        value_override: "{{ ((now().hour * 60 + now().minute) / 14.4) | round(0) | int }}% of the day gone"
+        status: "{{ ((1440 - now().hour * 60 - now().minute) / 60) | round(1) }} hours left today"
+      groups:
+        # Row 1: three big live numbers.
+        - columns:
+            - weight: 1
+              text_stacking: center
+              children:
+                - text: "{{ states.light | selectattr('state', 'eq', 'on') | list | count }}"
+                  style: titleNumeral
+                  align: center
+                - { text: Lights on, style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - text: "{{ states.person | selectattr('state', 'eq', 'home') | list | count }}"
+                  style: titleNumeral
+                  align: center
+                - { text: People home, style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - text: "{{ states.automation | selectattr('state', 'eq', 'on') | list | count }}"
+                  style: titleNumeral
+                  align: center
+                - { text: Automations on, style: captionSubtle, align: center }
+        # Row 2: the sun.
+        - columns:
+            - weight: 1
+              children:
+                - { text: Sunrise, style: captionSubtle, align: center }
+                - text: "{{ as_timestamp(state_attr('sun.sun', 'next_rising')) | timestamp_custom('%H:%M') }}"
+                  style: base
+                  align: center
+            - weight: 1
+              children:
+                - { text: Sunset, style: captionSubtle, align: center }
+                - text: "{{ as_timestamp(state_attr('sun.sun', 'next_setting')) | timestamp_custom('%H:%M') }}"
+                  style: base
+                  align: center
+            - weight: 1
+              children:
+                - { text: The sun is, style: captionSubtle, align: center }
+                - text: "{{ 'Up' if is_state('sun.sun', 'above_horizon') else 'Down' }}"
+                  style: base
+                  align: center
+    buttons:
+      # Change this to your own Home Assistant address.
+      - content: Open Home Assistant
+        activation: protocol
+        uri: https://homeassistant.local:8123
+        style: Success
+      - type: dismiss
+    context_menu:
+      - content: Report an issue
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/issues
+    audio:
+      silent: true
+
+---
+# 6. Installing, with a live progress bar
+#
+# A script rather than a single action: it shows the toast, then moves the progress bar along
+# with hass_toast.update, ending on "Install complete". The toast stays in place and doesn't
+# pop up again for each step.
+#
+# Paste into Settings -> Automations & scenes -> Scripts -> Add script -> (three dots) ->
+# Edit in YAML, save, then run it.
+#
+# Every update replaces all four progress fields, so each step repeats the title. Leave one out
+# and it goes blank.
+alias: HASS Windows Toast - install progress demo
+sequence:
+  - action: notify.hass_toast
+    data:
+      message: Getting everything ready...
+      tag: welcome-install
+      data:
+        # Stays on screen while the bar fills, instead of fading after a few seconds.
+        scenario: reminder
+        visual:
+          text:
+            - Setting up HASS Windows Toast
+            - Getting everything ready...
+          attribution: CrossboxLabs
+          app_logo:
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+            crop: circle
+            alt: HASS Windows Toast logo
+          hero:
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+            alt: HASS Windows Toast
+          progress:
+            title: HASS Windows Toast
+            value: 0
+            value_override: "0%"
+            status: Starting...
+        buttons:
+          - content: Try the samples
+            activation: protocol
+            uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+            style: Success
+          - type: dismiss
+  - repeat:
+      for_each:
+        - { value: 0.2, status: Connecting to Home Assistant... }
+        - { value: 0.45, status: Pairing this computer... }
+        - { value: 0.7, status: Registering with Windows... }
+        - { value: 0.9, status: Sending a test notification... }
+      sequence:
+        - delay:
+            seconds: 2
+        - action: hass_toast.update
+          data:
+            tag: welcome-install
+            progress:
+              title: HASS Windows Toast
+              value: "{{ repeat.item.value }}"
+              value_override: "{{ (repeat.item.value * 100) | int }}%"
+              status: "{{ repeat.item.status }}"
+  - delay:
+      seconds: 2
+  - action: hass_toast.update
+    data:
+      tag: welcome-install
+      progress:
+        title: HASS Windows Toast
+        value: 1
+        value_override: Done
+        status: Install complete
+
+---
+# 7. It works! (first-run)
+#
+# For the moment setup finishes. Shows the route the toast just took, so a new user sees that
+# Home Assistant really is talking to this PC, then points at the first thing to try.
+action: notify.hass_toast
+data:
+  message: This notification came from Home Assistant.
+  tag: welcome-it-works
+  data:
+    scenario: reminder
+    visual:
+      text:
+        - It works! 🎉
+        - This notification just came from your Home Assistant.
+      attribution: HASS Windows Toast
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        crop: circle
+        alt: HASS Windows Toast logo
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: HASS Windows Toast
+      # The route it took, as three steps.
+      groups:
+        - columns:
+            - weight: 3
+              text_stacking: center
+              children:
+                - { text: Home Assistant, style: base, align: center }
+                - { text: sent it, style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: "→", style: subtitle, align: center }
+            - weight: 3
+              text_stacking: center
+              children:
+                - { text: Your network, style: base, align: center }
+                - { text: signed and encrypted, style: captionSubtle, align: center }
+            - weight: 1
+              text_stacking: center
+              children:
+                - { text: "→", style: subtitle, align: center }
+            - weight: 3
+              text_stacking: center
+              children:
+                - { text: This PC, style: base, align: center }
+                - { text: showed it, style: captionSubtle, align: center }
+    buttons:
+      - content: Send my first toast
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast#sending-your-first-notification
+        style: Success
+      - content: Browse samples
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+      - type: dismiss
+
+---
+# 8. Good evening (first-run, with a quick-start)
+#
+# Greets by time of day, then gives the three steps to a first toast of their own - no need to
+# read anything else first.
+action: notify.hass_toast
+data:
+  message: HASS Windows Toast is ready on this PC.
+  tag: welcome-quick-start
+  data:
+    scenario: reminder
+    header:
+      id: hass-toast
+      title: HASS Windows Toast
+    visual:
+      text:
+        - "Good {{ 'morning' if now().hour < 12 else 'afternoon' if now().hour < 18 else 'evening' }} - you're all set up."
+        - Here's how to send a toast of your own.
+      attribution: HASS Windows Toast
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        crop: circle
+        alt: HASS Windows Toast logo
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: CrossboxLabs
+      # A numbered checklist: big numbers in a narrow column, the step beside each.
+      groups:
+        - columns:
+            - { weight: 1, text_stacking: center, children: [{ text: "1", style: subheaderNumeral, align: center }] }
+            - weight: 6
+              text_stacking: center
+              children:
+                - { text: "Open Developer tools, then Actions", style: base }
+                - { text: in Home Assistant, style: captionSubtle }
+        - columns:
+            - { weight: 1, text_stacking: center, children: [{ text: "2", style: subheaderNumeral, align: center }] }
+            - weight: 6
+              text_stacking: center
+              children:
+                - { text: Paste in any sample, style: base }
+                - { text: from the samples folder on GitHub, style: captionSubtle }
+        - columns:
+            - { weight: 1, text_stacking: center, children: [{ text: "3", style: subheaderNumeral, align: center }] }
+            - weight: 6
+              text_stacking: center
+              children:
+                - { text: Watch it pop up right here, style: base }
+                - { text: then make it your own, style: captionSubtle }
+    buttons:
+      - content: Open the samples
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+        style: Success
+      - type: dismiss
+
+---
+# 9. Less is more (first-run)
+#
+# Just the banner, one line and one button. A calm first impression that lets the animation do
+# the talking.
+action: notify.hass_toast
+data:
+  message: Rich notifications from Home Assistant, now on this PC.
+  tag: welcome-minimal
+  data:
+    duration: long
+    visual:
+      text:
+        - Welcome to HASS Windows Toast
+        - Rich notifications from Home Assistant, now on this PC.
+      attribution: CrossboxLabs
+      hero:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        alt: HASS Windows Toast
+    buttons:
+      - content: See what it can do
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+        style: Success
+
+---
+# 10. Self-test, then the quick start (first-run)
+#
+# A script. One toast with a progress bar walks through the checks, then the quick-start toast
+# takes its place. The "clear" step is real: hass_toast.clear is what removes the progress
+# toast before the quick start appears, so seeing the quick start proves clear works too.
+#
+# Paste into Settings -> Automations & scenes -> Scripts -> Add script -> (three dots) ->
+# Edit in YAML, save, then run it and pick the computer.
+alias: HASS Windows Toast - self-test and quick start
+fields:
+  computer:
+    name: Computer
+    description: The device id of the computer to test.
+    default: my-pc
+    selector:
+      text:
+sequence:
+  - action: notify.hass_toast
+    data:
+      target: "{{ computer }}"
+      title: HASS Toast
+      message: Checking everything works...
+      tag: self-test
+      data:
+        # About 25 seconds on screen instead of 5, so every step can be watched.
+        duration: long
+        visual:
+          app_logo:
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+            crop: circle
+            alt: HASS Toast logo
+          progress:
+            title: Self-test
+            value: 0.25
+            value_override: 1 of 4
+            status: Testing toast Home Assistant actions (send)
+  - repeat:
+      for_each:
+        - { value: 0.5, step: 2 of 4, status: Testing toast Home Assistant actions (update) }
+        - { value: 0.75, step: 3 of 4, status: Testing toast Home Assistant actions (clear) }
+        - { value: 1, step: 4 of 4, status: "Testing signed message to COMPUTER" }
+      sequence:
+        - delay:
+            seconds: 2
+        - action: hass_toast.update
+          data:
+            target: "{{ computer }}"
+            tag: self-test
+            progress:
+              title: Self-test
+              value: "{{ repeat.item.value }}"
+              value_override: "{{ repeat.item.step }}"
+              status: "{{ repeat.item.status | replace('COMPUTER', computer) }}"
+  - delay:
+      seconds: 2
+  # The clear test: removes the progress toast from this computer.
+  - action: hass_toast.clear
+    data:
+      target: "{{ computer }}"
+  - action: notify.hass_toast
+    data:
+      target: "{{ computer }}"
+      title: Thanks for installing HASS Toast!
+      message: If you like it, a star on GitHub helps other Home Assistant users find it.
+      tag: welcome-thanks
+      attribution: CrossboxLabs
+      data:
+        scenario: reminder
+        visual:
+          app_logo:
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+            crop: circle
+            alt: HASS Toast logo
+        buttons:
+          - content: "⭐ Star on GitHub"
+            activation: protocol
+            uri: https://github.com/crosso-au/hass-toast
+          - content: Maybe later
+            type: dismiss
+  - action: notify.hass_toast
+    data:
+      target: "{{ computer }}"
+      message: HASS Windows Toast is ready on this PC.
+      tag: welcome-quick-start
+      data:
+        scenario: reminder
+        header:
+          id: hass-toast
+          title: HASS Windows Toast
+        visual:
+          text:
+            - "Good {{ 'morning' if now().hour < 12 else 'afternoon' if now().hour < 18 else 'evening' }} - you're all set up."
+            - Here's how to send a toast of your own.
+          attribution: HASS Windows Toast
+          app_logo:
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+            crop: circle
+            alt: HASS Windows Toast logo
+          hero:
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+            alt: CrossboxLabs
+          groups:
+            - columns:
+                - { weight: 1, text_stacking: center, children: [{ text: "1", style: subheaderNumeral, align: center }] }
+                - weight: 6
+                  text_stacking: center
+                  children:
+                    - { text: "Open Developer tools, then Actions", style: base }
+                    - { text: in Home Assistant, style: captionSubtle }
+            - columns:
+                - { weight: 1, text_stacking: center, children: [{ text: "2", style: subheaderNumeral, align: center }] }
+                - weight: 6
+                  text_stacking: center
+                  children:
+                    - { text: Paste in any sample, style: base }
+                    - { text: from the samples folder on GitHub, style: captionSubtle }
+            - columns:
+                - { weight: 1, text_stacking: center, children: [{ text: "3", style: subheaderNumeral, align: center }] }
+                - weight: 6
+                  text_stacking: center
+                  children:
+                    - { text: Watch it pop up right here, style: base }
+                    - { text: then make it your own, style: captionSubtle }
+        buttons:
+          - content: Open samples
+            activation: protocol
+            uri: https://github.com/crosso-au/hass-toast/tree/main/samples
+            style: Success
+          - type: dismiss
+
+---
+# 11. Thank you (first-run)
+#
+# A simple thank-you from CrossboxLabs, with a nudge to star the project on GitHub.
+action: notify.hass_toast
+data:
+  title: Thanks for installing HASS Toast!
+  message: If you like it, a star on GitHub helps other Home Assistant users find it.
+  tag: welcome-thanks
+  attribution: CrossboxLabs
+  data:
+    # Stays on screen until the user picks a button.
+    scenario: reminder
+    visual:
+      app_logo:
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
+        crop: circle
+        alt: HASS Toast logo
+    buttons:
+      - content: "⭐ Star on GitHub"
+        activation: protocol
+        uri: https://github.com/crosso-au/hass-toast
+        style: Success
+      - content: Maybe later
+        type: dismiss

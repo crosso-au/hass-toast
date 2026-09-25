@@ -226,6 +226,36 @@ public sealed class HomeAssistantAdminTests
         Assert.False(running);
     }
 
+    [Fact]
+    public async Task An_action_is_performed_through_the_services_api_with_its_data()
+    {
+        await using var server = new FakeHomeAssistantAdmin();
+        server.Start();
+
+        using var admin = new HomeAssistantAdmin(ConfigFor(server), "good-token");
+
+        await admin.CallServiceAsync("hass_toast", "update",
+            """{"tag":"self-test","progress":{"value":0.5,"status":"Testing"}}""", CancellationToken.None);
+
+        var (service, body) = Assert.Single(server.ServiceCalls);
+        Assert.Equal("hass_toast.update", service);
+        Assert.Contains("\"tag\":\"self-test\"", body);
+    }
+
+    [Fact]
+    public async Task A_failed_action_says_which_action_failed()
+    {
+        await using var server = new FakeHomeAssistantAdmin();
+        server.Start();
+
+        using var admin = new HomeAssistantAdmin(ConfigFor(server), "good-token");
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            admin.CallServiceAsync("notify", "missing", "{}", CancellationToken.None));
+
+        Assert.Contains("notify.missing", ex.Message);
+    }
+
     /// <summary><see cref="Progress{T}"/> posts to the thread pool; tests want the lines now.</summary>
     private sealed class SynchronousProgress(Action<string> report) : IProgress<string>
     {

@@ -67,6 +67,9 @@ public sealed class FakeHomeAssistantAdmin : IAsyncDisposable
     public List<string> DeletedEntryIds { get; } = [];
     public int RestartCount { get; private set; }
 
+    /// <summary>Every action performed through api/services, as "domain.service" and its body.</summary>
+    public List<(string Service, string Body)> ServiceCalls { get; } = [];
+
     public void Start()
     {
         _listener.Start();
@@ -177,6 +180,22 @@ public sealed class FakeHomeAssistantAdmin : IAsyncDisposable
         if (request.HttpMethod == "POST" && path.StartsWith("/api/config/config_entries/flow/"))
         {
             await ServeFlowSubmissionAsync(context);
+            return;
+        }
+
+        if (request.HttpMethod == "POST" && path.StartsWith("/api/services/"))
+        {
+            using var reader = new StreamReader(request.InputStream, Encoding.UTF8);
+            var service = path["/api/services/".Length..].Replace('/', '.');
+            ServiceCalls.Add((service, await reader.ReadToEndAsync()));
+
+            if (service == "notify.missing")
+            {
+                await RespondAsync(context, 400, """{"message":"Service not found."}""");
+                return;
+            }
+
+            await RespondAsync(context, 200, "[]");
             return;
         }
 

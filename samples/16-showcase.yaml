@@ -1,0 +1,195 @@
+# Showcase: real-world toasts
+#
+# Complete, ready-to-adapt examples of the bigger things a toast can do.
+#
+# 1. Doorbell: an incoming-call toast that rings, shows the camera snapshot and has Answer,
+#    Unlock and Ignore buttons. Sent by the automation in block 2.
+# 2. The doorbell automations: one sends the toast when the doorbell is pressed, the other
+#    acts on the buttons - and removes the toast from every computer once anyone answers.
+# 3. Countdown timer: a script whose progress bar empties with the time left, then rings when
+#    it reaches zero.
+#
+# Change the entity ids (binary_sensor.doorbell, camera.doorbell, lock.front_door,
+# media_player.kitchen) and the Home Assistant address to your own.
+
+# 1. Doorbell
+action: notify.hass_toast
+data:
+  message: Doorbell pressed just now
+  tag: doorbell
+  group: security
+  data:
+    # Full-size call layout, stays until answered, rings.
+    scenario: incomingCall
+    visual:
+      text:
+        - Someone is at the front door
+        - Doorbell pressed just now
+      attribution: Front door camera
+      app_logo:
+        src: https://picsum.photos/id/1005/96/96
+        crop: circle
+        alt: Visitor
+      # Use a real snapshot with:
+      # src: "https://homeassistant.local:8123{{ state_attr('camera.doorbell', 'entity_picture') }}"
+      inline:
+        src: https://picsum.photos/id/1031/600/340
+        alt: Doorbell camera snapshot
+    buttons:
+      - content: Answer
+        args:
+          action: answer
+        style: Success
+      - content: Unlock
+        args:
+          action: unlock
+      - content: Ignore
+        args:
+          action: ignore
+        style: Critical
+    audio:
+      src: ms-winsoundevent:Notification.Looping.Call
+      loop: true
+
+---
+# 2a. Send the doorbell toast when the doorbell is pressed.
+alias: Doorbell - toast every computer
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.doorbell
+    to: "on"
+actions:
+  - action: notify.hass_toast
+    data:
+      message: "Doorbell pressed at {{ now().strftime('%H:%M') }}"
+      tag: doorbell
+      group: security
+      data:
+        scenario: incomingCall
+        visual:
+          text:
+            - Someone is at the front door
+            - "Doorbell pressed at {{ now().strftime('%H:%M') }}"
+          attribution: Front door camera
+          inline:
+            src: "https://homeassistant.local:8123{{ state_attr('camera.doorbell', 'entity_picture') }}"
+            alt: Doorbell camera snapshot
+        buttons:
+          - { content: Answer, args: { action: answer }, style: Success }
+          - { content: Unlock, args: { action: unlock } }
+          - { content: Ignore, args: { action: ignore }, style: Critical }
+        audio:
+          src: ms-winsoundevent:Notification.Looping.Call
+          loop: true
+
+---
+# 2b. Act on the buttons. Whoever answers first, the toast is removed from every computer.
+alias: Doorbell - handle the toast buttons
+triggers:
+  - trigger: event
+    event_type: hass_toast_response
+    event_data:
+      tag: doorbell
+actions:
+  # No target: removes it from every computer, not just the one that answered.
+  - action: hass_toast.remove
+    data:
+      tag: doorbell
+      group: security
+  - choose:
+      - conditions: "{{ trigger.event.data.arguments.action == 'answer' }}"
+        sequence:
+          - action: tts.speak
+            target:
+              entity_id: tts.home_assistant_cloud
+            data:
+              media_player_entity_id: media_player.kitchen
+              message: Someone is coming to the door now.
+      - conditions: "{{ trigger.event.data.arguments.action == 'unlock' }}"
+        sequence:
+          - action: lock.unlock
+            target:
+              entity_id: lock.front_door
+          - action: notify.hass_toast
+            data:
+              title: Front door unlocked
+              message: "Unlocked from {{ trigger.event.data.device_id }}"
+              group: security
+              attribution: Front door lock
+
+---
+# 3. Countdown timer
+#
+# A script with a "minutes" field. The bar starts full and empties as time runs out, updating
+# every 15 seconds without popping up again. At zero the timer toast is removed and a ringing
+# "Time's up" toast takes its place.
+alias: Toast countdown timer
+fields:
+  minutes:
+    name: Minutes
+    default: 5
+    selector:
+      number:
+        min: 1
+        max: 120
+  label:
+    name: What for
+    default: Pasta
+    selector:
+      text:
+sequence:
+  - variables:
+      total: "{{ (minutes | int) * 60 }}"
+  - action: notify.hass_toast
+    data:
+      message: "{{ label }} timer started"
+      tag: countdown
+      data:
+        visual:
+          text:
+            - "{{ label }} timer"
+            - "{{ minutes }} minutes, started at {{ now().strftime('%H:%M') }}"
+          attribution: Timer
+          progress:
+            title: "{{ label }}"
+            value: 1
+            value_override: "{{ minutes }}:00 left"
+            status: Running
+        buttons:
+          - type: dismiss
+  - repeat:
+      for_each: "{{ range(15, total | int, 15) | list }}"
+      sequence:
+        - delay:
+            seconds: 15
+        - variables:
+            left: "{{ (total | int) - repeat.item }}"
+        - action: hass_toast.update
+          data:
+            tag: countdown
+            progress:
+              title: "{{ label }}"
+              value: "{{ (left / (total | int)) | round(3) }}"
+              value_override: "{{ left // 60 }}:{{ '%02d' % (left % 60) }} left"
+              status: Running
+  - delay:
+      seconds: 15
+  - action: hass_toast.remove
+    data:
+      tag: countdown
+  - action: notify.hass_toast
+    data:
+      message: "{{ label }} is done"
+      tag: countdown-done
+      data:
+        scenario: alarm
+        visual:
+          text:
+            - Time's up!
+            - "Your {{ minutes }} minute {{ label | lower }} timer has finished."
+          attribution: Timer
+        buttons:
+          - type: dismiss
+        audio:
+          src: ms-winsoundevent:Notification.Looping.Alarm2
+          loop: true

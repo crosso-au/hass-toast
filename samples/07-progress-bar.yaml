@@ -10,6 +10,9 @@
 #
 # To move the bar along later without a new pop-up each time, give the toast a tag and use
 # hass_toast.update (below). The toast keeps its place and does not pop up again.
+#
+# Each update replaces all four fields - title, value, value_override and status - so repeat
+# any you want to keep. One left out of an update goes blank.
 
 # 1. Start the progress bar.
 action: notify.hass_toast
@@ -28,12 +31,13 @@ data:
 
 ---
 # 2. Move it along. tag (and group, if the toast has one) must match the original.
-#    progress accepts the same fields as above.
+#    Repeat the title, or it goes blank.
 action: hass_toast.update
 data:
   tag: backup-nightly
   group: maintenance
   progress:
+    title: Documents
     value: 0.8
     value_override: 80 of 100 GB
     status: Uploading...
@@ -45,6 +49,7 @@ data:
   tag: backup-nightly
   group: maintenance
   progress:
+    title: Documents
     value: 1
     value_override: 100 GB
     status: Complete
@@ -69,5 +74,6 @@ action: hass_toast.update
 data:
   tag: media-reindex
   progress:
+    title: Scanning
     value: "{{ states('sensor.download_progress') | float(0) / 100 }}"
     status: "{{ states('sensor.download_status') }}"

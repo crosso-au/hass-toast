@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using Windows.Data.Xml.Dom;
@@ -49,7 +50,7 @@ public sealed class WindowsToastNotifier
         var toast = new ToastNotification(document);
 
         if (!string.IsNullOrWhiteSpace(options.Tag)) toast.Tag = Sanitise(options.Tag);
-        if (!string.IsNullOrWhiteSpace(options.Group)) toast.Group = Sanitise(options.Group);
+        toast.Group = GroupFor(options.Group);
 
         if (options.ExpiresIn is { } seconds && seconds > 0)
             toast.ExpirationTime = DateTimeOffset.Now.AddSeconds(seconds);
@@ -80,18 +81,91 @@ public sealed class WindowsToastNotifier
         return true;
     }
 
-    public NotificationUpdateResult Update(NotificationData data, string tag, string? group)
-        => string.IsNullOrWhiteSpace(group)
-            ? Notifier.Update(data, Sanitise(tag))
-            : Notifier.Update(data, Sanitise(tag), Sanitise(group));
+    /// <summary>
+    /// The group given to a toast sent without one.
+    /// <para>
+    /// Windows offers an unpackaged app no way to remove a toast that has no group. The removal
+    /// overloads that take the AUMID reject an empty group, and the shorter ones resolve the app
+    /// from the calling process, which for an unpackaged app finds nothing — both fail even with
+    /// the toast sitting in the Action Center. Giving every toast a group is what makes
+    /// <c>hass_toast.remove</c> by tag work at all. It never reaches Home Assistant: activation
+    /// arguments carry the payload's own group, not this one.
+    /// </para>
+    /// </summary>
+    internal const string DefaultGroup = "hass-toast-default";
 
-    public void Remove(string tag) => ToastNotificationManager.History.Remove(Sanitise(tag));
+    internal static string GroupFor(string? group)
+        => string.IsNullOrWhiteSpace(group) ? DefaultGroup : Sanitise(group);
+
+    public NotificationUpdateResult Update(NotificationData data, string tag, string? group)
+    {
+        var result = Notifier.Update(data, Sanitise(tag), GroupFor(group));
+
+        // A toast raised before every toast was given a group has none, and only the tag-only
+        // overload can find it.
+        if (result == NotificationUpdateResult.NotificationNotFound && string.IsNullOrWhiteSpace(group))
+            result = Notifier.Update(data, Sanitise(tag));
+
+        return result;
+    }
+
+    // Every removal names the AUMID explicitly; see DefaultGroup for why the shorter overloads
+    // cannot be used.
+
+    /// <summary>
+    /// Removes every toast with this tag, whatever group it was sent in. The only overload that
+    /// takes an AUMID also needs the group, so each match is looked up to find its own.
+    /// </summary>
+    public void Remove(string tag)
+    {
+        var wanted = Sanitise(tag);
+
+        var groups = GetAll()
+            .Where(n => string.Equals(n.Tag, wanted, StringComparison.Ordinal))
+            .Select(n => n.Group ?? "")
+            .Distinct()
+            .ToList();
+
+        foreach (var group in groups)
+        {
+            if (group.Length == 0)
+            {
+                // Raised before every toast was given a group; there is no API that can reach it.
+                _log.LogWarning(
+                    "The toast tagged '{Tag}' predates this version and cannot be removed; it stays until dismissed.",
+                    wanted);
+                continue;
+            }
+
+            IgnoreNotFound(() => ToastNotificationManager.History.Remove(wanted, group, AppIdentity.Aumid));
+        }
+    }
 
     public void Remove(string tag, string group)
-        => ToastNotificationManager.History.Remove(Sanitise(tag), Sanitise(group));
+        => IgnoreNotFound(() =>
+            ToastNotificationManager.History.Remove(Sanitise(tag), Sanitise(group), AppIdentity.Aumid));
 
     public void RemoveGroup(string group)
-        => ToastNotificationManager.History.RemoveGroup(Sanitise(group));
+        => IgnoreNotFound(() =>
+            ToastNotificationManager.History.RemoveGroup(Sanitise(group), AppIdentity.Aumid));
+
+    /// <summary>
+    /// A toast the user has already dismissed is the most ordinary reason for there to be nothing
+    /// to remove, and the outcome asked for has happened either way.
+    /// </summary>
+    private void IgnoreNotFound(Action remove)
+    {
+        try
+        {
+            remove();
+        }
+        catch (COMException ex) when (ex.HResult == ErrorNotFound)
+        {
+            _log.LogDebug("Nothing to remove: {Message}", ex.Message);
+        }
+    }
+
+    private const int ErrorNotFound = unchecked((int)0x80070490);
 
     public void Clear() => ToastNotificationManager.History.Clear(AppIdentity.Aumid);
 
@@ -124,6 +198,6 @@ public sealed class WindowsToastNotifier
     }
 
     /// <summary>Tags and groups are capped at 64 characters and rejected outright if longer.</summary>
-    private static string Sanitise(string value)
+    internal static string Sanitise(string value)
         => value.Length <= 64 ? value : value[..64];
 }

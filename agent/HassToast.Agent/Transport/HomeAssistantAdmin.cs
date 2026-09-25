@@ -526,6 +526,28 @@ public sealed class HomeAssistantAdmin : IDisposable
         }
     }
 
+    /// <summary>
+    /// Performs a Home Assistant action, such as <c>notify.hass_toast</c>, exactly as an
+    /// automation would. The installer's self-test uses this so it exercises the integration's
+    /// real actions end to end rather than a shortcut around them.
+    /// </summary>
+    /// <param name="jsonData">The action's data, as a JSON object.</param>
+    public async Task CallServiceAsync(string domain, string service, string jsonData, CancellationToken ct)
+    {
+        using var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+        using var response = await _http.PostAsync($"api/services/{domain}/{service}", content, ct);
+
+        if (response.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden)
+            throw new InvalidOperationException("Home Assistant refused the access token.");
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(ct);
+            throw new InvalidOperationException(
+                $"{domain}.{service} failed with {(int)response.StatusCode}: {Truncate(body)}");
+        }
+    }
+
     /// <summary>Removes one machine's entry. Leaves the integration and HACS alone.</summary>
     public async Task<bool> DeleteEntryAsync(string entryId, CancellationToken ct)
     {

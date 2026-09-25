@@ -194,7 +194,11 @@ public static class Uninstaller
         }
     }
 
-    private static UninstallStep StopAgent(IProgress<string>? progress)
+    /// <summary>
+    /// Stops the running agent, asking first and ending the process if it does not respond.
+    /// Also used by the installer, which cannot replace the agent's files while it is running.
+    /// </summary>
+    internal static UninstallStep StopAgent(IProgress<string>? progress)
     {
         const string name = "Stop the agent";
 

@@ -35,6 +35,8 @@ computer.
 | [12-responding-to-clicks.yaml](12-responding-to-clicks.yaml) | Automations that act on button clicks and typed replies |
 | [13-everything.yaml](13-everything.yaml) | One toast using most options together |
 | [14-animated-hero.yaml](14-animated-hero.yaml) | An animated GIF as the banner image |
+| [15-welcome.yaml](15-welcome.yaml) | Welcome and first-run toasts: a feature tour, "you're all set", a two-way "say hello back", a live "your home right now", an "installing" progress bar, "It works!", a quick start, a minimal one, a thank-you, and the self-test the installer runs |
+| [16-showcase.yaml](16-showcase.yaml) | Real-world showcases: a ringing doorbell with a camera snapshot and Answer/Unlock/Ignore buttons (plus the automations behind it), and a countdown timer whose bar empties and then rings |
 
 ## Where the options go
 
@@ -70,4 +72,3 @@ the Windows-specific options.
 
 If you set `visual.text`, it replaces `title` and `message` as the toast's lines. `message` is
 still required by the action, so keep it.
-
