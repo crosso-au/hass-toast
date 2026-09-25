@@ -1,0 +1,69 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- Console subsystem, not WinExe. As a GUI-subsystem app neither cmd nor PowerShell waits
+         for it, so command output raced the returning prompt and often appeared to vanish, and
+         reaching the caller's console at all depended on AttachConsole. As a console app the
+         CLI works naturally everywhere; the tray agent hides its own window at startup. -->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RootNamespace>HassToast.Agent</RootNamespace>
+    <AssemblyName>HassToast.Agent</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- Tray icon. WinForms is used only for NotifyIcon; there is no XAML/WinUI surface. -->
+    <UseWindowsForms>true</UseWindowsForms>
+
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+
+    <!-- The agent must never run elevated: the platform does not deliver
+         notifications for elevated processes. -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <!-- What Explorer, Task Manager and Alt+Tab show for the executable itself. -->
+    <ApplicationIcon>$(RepoRoot)assets\hass-toast.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- The mark travels inside the executable rather than beside it. A single-file self-contained
+       publish is one file by design, and the tray needs its icon before anything has been laid
+       down on disk: during uninstall, and on the very first run from a downloads folder. -->
+  <ItemGroup>
+    <EmbeddedResource Include="$(RepoRoot)assets\hass-toast.ico" LogicalName="HassToast.Brand.icon.ico" />
+    <EmbeddedResource Include="$(RepoRoot)assets\icon-256.png" LogicalName="HassToast.Brand.icon-256.png" />
+  </ItemGroup>
+
+  <!-- There is deliberately no Microsoft.WindowsAppSDK reference here. It was carried for a
+       single call - AppInstance.FindOrRegisterForKey, for single-instancing - which AgentInstance
+       now does with a named mutex. The toast APIs this app actually depends on live in
+       Windows.UI.Notifications, projected by the net10.0-windows10.0.19041.0 target framework
+       rather than by that package.
+
+       Dropping it is what makes a clean install possible. An unpackaged app using the App SDK
+       needs the Windows App Runtime present, and the SDK's auto-initializer fails at startup
+       without it - so the installer would have had to chain a machine-wide MSI, which means
+       elevation, which the whole per-user design exists to avoid.
+
+       The self-contained single-file shape is applied by build/pack.ps1 on the publish command
+       rather than set here. Set as project properties they would also apply to `dotnet build`,
+       where self-contained without a RuntimeIdentifier is an SDK error - which would break the
+       plain solution build the README documents. -->
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="HassToast.Agent.Tests" />
+    <InternalsVisibleTo Include="HassToast.Setup" />
+  </ItemGroup>
+
+</Project>
