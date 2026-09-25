@@ -16,7 +16,11 @@
 #   ms-winsoundevent:Notification.Reminder
 #   ms-winsoundevent:Notification.SMS
 #   ms-winsoundevent:Notification.Looping.Alarm     (and Alarm2 to Alarm10)
+#      ms-winsoundevent:Notification.Looping.Alarm2
+#      ms-winsoundevent:Notification.Looping.Alarm3
 #   ms-winsoundevent:Notification.Looping.Call      (and Call2 to Call10)
+#      ms-winsoundevent:Notification.Looping.Call2
+#      ms-winsoundevent:Notification.Looping.Call3
 
 # A different one-off sound.
 action: notify.hass_toast
