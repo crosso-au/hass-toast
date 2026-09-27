@@ -29,6 +29,12 @@ automations can act on it.
 - **Several computers.** Install it on as many PCs as you like and choose which ones each
   notification goes to.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/arch.png" />
+</p>
+
+
+
 ## Contents
 
 - [Requirements](#requirements)
