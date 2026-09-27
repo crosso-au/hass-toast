@@ -87,8 +87,19 @@ The installer walks you through five steps:
 5. **Test notification.** Sends a real notification through Home Assistant. If it doesn't
    appear, select **No, nothing appeared** and the installer checks what went wrong.
 
-To change settings later, run the installer again. It fills in your current settings; only the
-access token has to be entered again.
+### Updating, repairing and changing settings
+
+Run the installer again. It sees what is already installed and offers the right thing:
+
+- **Update to *version*** when the installer is newer than what you have.
+- **Repair** when it's the same version. This reinstalls the app and restarts it, which is the
+  first thing to try if notifications stop arriving.
+- **Close** when what you have is newer than the installer. It won't install an older version
+  over a newer one.
+
+Updating and repairing keep your settings, access token and Home Assistant connection, so there
+is nothing to type. To change settings instead, select **Change settings**; your current settings,
+including the access token, are filled in.
 
 ## Sending your first notification
 
@@ -250,7 +261,7 @@ HASS Windows Toast runs in the notification area. Its icon shows the connection:
 | Green | Connected to Home Assistant. |
 | Amber | Connecting. |
 | Grey | Not connected. It keeps retrying. |
-| Red | Home Assistant rejected the access token. Run the installer again with a new token. |
+| Red | Home Assistant rejected the access token. Run the installer again, select **Change settings** and enter a new token. |
 
 Right-click the icon to see the status, send a test notification, open the log folder, turn
 **Start with Windows** on or off, or exit.
@@ -274,7 +285,7 @@ Right-click the tray icon and select **Open log folder**. Logs are in
 they have at least one button. HASS Windows Toast adds a Dismiss button if you give none, but
 check your buttons aren't all being dropped, such as icon buttons with a missing icon.
 
-**Moving to a new Home Assistant address, or a new token.** Run the installer again.
+**Moving to a new Home Assistant address, or a new token.** Run the installer again and select **Change settings**.
 
 **Command-line checks.** If you ticked **Add to PATH**, these work from any command prompt:
 
