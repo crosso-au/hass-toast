@@ -47,6 +47,15 @@ public sealed class NotificationPipeline
 
         var envelope = result.Envelope!;
 
+        // The agent's own update toasts use this group, and their buttons act on this machine
+        // rather than reporting to Home Assistant. A payload must not be able to raise or change one.
+        if (string.Equals(result.Payload?.Group, Updates.UpdateService.ToastGroup, StringComparison.OrdinalIgnoreCase))
+        {
+            _log.LogWarning("Rejected a {Op}: the group '{Group}' is reserved for the agent.",
+                envelope.Op, Updates.UpdateService.ToastGroup);
+            return;
+        }
+
         switch (envelope.Op)
         {
             case ToastOp.Send:

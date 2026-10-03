@@ -17,7 +17,7 @@ data:
   data:
     visual:
       hero:
-        src: https://github.com/crosso-au/hass-toast/blob/main/samples/images/hass-toast-hero.gif?raw=true
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
 
 ---
@@ -26,4 +26,4 @@ action: notify.hass_toast
 data:
   title: HASS Windows Toast
   message: Rich notifications from Home Assistant
-  image: https://github.com/crosso-au/hass-toast/blob/main/samples/images/hass-toast-hero.gif?raw=true
+  image: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif

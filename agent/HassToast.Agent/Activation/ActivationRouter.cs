@@ -2,6 +2,7 @@ using Microsoft.Extensions.Logging;
 using HassToast.Agent.Config;
 using HassToast.Agent.Toasts;
 using HassToast.Agent.Transport;
+using HassToast.Agent.Updates;
 
 namespace HassToast.Agent.Activation;
 
@@ -21,12 +22,15 @@ public sealed class ActivationRouter
 
     private readonly IToastSource _source;
     private readonly AgentConfig _config;
+    private readonly UpdateService _updates;
     private readonly ILogger<ActivationRouter> _log;
 
-    public ActivationRouter(IToastSource source, AgentConfig config, ILogger<ActivationRouter> log)
+    public ActivationRouter(
+        IToastSource source, AgentConfig config, UpdateService updates, ILogger<ActivationRouter> log)
     {
         _source = source;
         _config = config;
+        _updates = updates;
         _log = log;
     }
 
@@ -46,6 +50,14 @@ public sealed class ActivationRouter
         // the payload author actually put there.
         arguments.Remove(ActivationArguments.TagKey);
         arguments.Remove(ActivationArguments.GroupKey);
+
+        // The agent's own update toasts. Home Assistant did not raise them and has no say in them.
+        if (group == UpdateService.ToastGroup)
+        {
+            _log.LogInformation("Update toast activated.");
+            _updates.HandleActivation(arguments);
+            return;
+        }
 
         _log.LogInformation(
             "Toast activated (tag '{Tag}', {ArgCount} argument(s), {InputCount} input(s)).",

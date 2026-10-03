@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using HassToast.Agent.Config;
 using HassToast.Agent.Toasts;
 using HassToast.Agent.Transport;
+using HassToast.Agent.Updates;
 
 namespace HassToast.Agent.Tray;
 
@@ -17,6 +18,8 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly NotifyIcon _icon;
     private readonly ToolStripMenuItem _statusItem;
     private readonly ToolStripMenuItem _startupItem;
+    private readonly ToolStripMenuItem _autoUpdateItem;
+    private readonly UpdateService _updates;
     private readonly IToastSource _source;
     private readonly Action _onExit;
     private readonly Func<Task> _sendTestToast;
@@ -24,9 +27,11 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly List<IntPtr> _iconHandles = [];
     private readonly Control _marshal = new();
 
-    public TrayApplicationContext(IToastSource source, Action onExit, Func<Task> sendTestToast)
+    public TrayApplicationContext(
+        IToastSource source, UpdateService updates, Action onExit, Func<Task> sendTestToast)
     {
         _source = source;
+        _updates = updates;
         _onExit = onExit;
         _sendTestToast = sendTestToast;
 
@@ -43,11 +48,21 @@ public sealed class TrayApplicationContext : ApplicationContext
         menu.Items.Add("Open log folder", null, (_, _) => OpenLogFolder());
         menu.Items.Add(_startupItem);
         menu.Items.Add(new ToolStripSeparator());
+
+        // Answers with a toast either way, so there is nothing to wait for here.
+        menu.Items.Add("Check for updates", null, (_, _) => _ = _updates.CheckNowAsync());
+        _autoUpdateItem = new ToolStripMenuItem("Check for updates automatically", null, (_, _) => ToggleAutoUpdate());
+        menu.Items.Add(_autoUpdateItem);
+        menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("Exit", null, (_, _) => ExitAgent());
 
         // The setting can change behind our back — Task Manager's Startup tab writes the same
         // registration — so read it each time the menu is opened rather than only at startup.
-        menu.Opening += (_, _) => RefreshStartupItem();
+        menu.Opening += (_, _) =>
+        {
+            RefreshStartupItem();
+            _autoUpdateItem.Checked = _updates.CheckAutomatically;
+        };
 
         _icon = new NotifyIcon
         {
@@ -123,6 +138,12 @@ public sealed class TrayApplicationContext : ApplicationContext
 
         // Either way, show what the registry now says rather than what was asked for.
         RefreshStartupItem();
+    }
+
+    private void ToggleAutoUpdate()
+    {
+        _updates.CheckAutomatically = !_updates.CheckAutomatically;
+        _autoUpdateItem.Checked = _updates.CheckAutomatically;
     }
 
     private void OnStateChanged(ConnectionState state, string? detail)

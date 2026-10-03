@@ -148,6 +148,12 @@ public static class InstallFootprint
                 () => File.Exists(Path.Combine(AgentConfig.DefaultDirectory, "secrets.dat")),
                 () => DeleteFile(Path.Combine(AgentConfig.DefaultDirectory, "secrets.dat"))),
 
+            new("Update settings",
+                Updates.UpdateState.DefaultPath,
+                FootprintKind.File,
+                () => File.Exists(Updates.UpdateState.DefaultPath),
+                () => DeleteFile(Updates.UpdateState.DefaultPath)),
+
             new("App icon",
                 Path.Combine(AgentConfig.DefaultDirectory, "icon.png"),
                 FootprintKind.File,
@@ -179,6 +185,12 @@ public static class InstallFootprint
                 FootprintKind.Directory,
                 () => Directory.Exists(AgentConfig.ImageCacheDirectory),
                 () => DeleteDirectory(AgentConfig.ImageCacheDirectory)),
+
+            new("Downloaded updates",
+                Updates.UpdateState.DownloadDirectory,
+                FootprintKind.Directory,
+                () => Directory.Exists(Updates.UpdateState.DownloadDirectory),
+                () => DeleteDirectory(Updates.UpdateState.DownloadDirectory)),
 
             new("Start Menu shortcut",
                 $@"%APPDATA%\Microsoft\Windows\Start Menu\Programs\*.lnk (AUMID {AppIdentity.Aumid})",

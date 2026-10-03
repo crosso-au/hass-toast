@@ -89,7 +89,22 @@ The installer walks you through five steps:
 
 ### Updating, repairing and changing settings
 
-Run the installer again. It sees what is already installed and offers the right thing:
+From 2.1.2, the app checks for updates once a day. When there's a new version you get a
+notification:
+
+- **Update now** downloads the new version and installs it. Your settings are kept.
+- **Remind me tomorrow** asks again in a day.
+- **Skip this version** won't mention this version again. You'll still hear about the next one.
+
+Select the notification itself to see what's new. To check straight away, right-click the tray icon
+and select **Check for updates**. To stop the daily check, untick **Check for updates
+automatically** on the same menu.
+
+Updates are signed. The app only installs one that is a genuine HASS Windows Toast release.
+
+The Home Assistant integration updates through HACS as usual.
+
+You can also run the installer again. It sees what is already installed and offers the right thing:
 
 - **Update to *version*** when the installer is newer than what you have.
 - **Repair** when it's the same version. This reinstalls the app and restarts it, which is the
@@ -264,7 +279,8 @@ HASS Windows Toast runs in the notification area. Its icon shows the connection:
 | Red | Home Assistant rejected the access token. Run the installer again, select **Change settings** and enter a new token. |
 
 Right-click the icon to see the status, send a test notification, open the log folder, turn
-**Start with Windows** on or off, or exit.
+**Start with Windows** on or off, check for updates, turn the daily update check on or off, or
+exit.
 
 ## Troubleshooting
 

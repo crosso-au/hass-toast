@@ -11,6 +11,7 @@ using HassToast.Agent.Security;
 using HassToast.Agent.Toasts;
 using HassToast.Agent.Transport;
 using HassToast.Agent.Tray;
+using HassToast.Agent.Updates;
 
 namespace HassToast.Agent;
 
@@ -294,6 +295,9 @@ internal static class Program
             RegisterToastPipeline(builder.Services);
             builder.Services.AddSingleton<ActivationRouter>();
             builder.Services.AddHostedService<AgentWorker>();
+            builder.Services.AddSingleton(_ => new ReleaseFeed());
+            builder.Services.AddSingleton<UpdateService>();
+            builder.Services.AddHostedService(sp => sp.GetRequiredService<UpdateService>());
 
             using var host = builder.Build();
 
@@ -315,6 +319,7 @@ internal static class Program
             var source = host.Services.GetRequiredService<IToastSource>();
             using var tray = new TrayApplicationContext(
                 source,
+                host.Services.GetRequiredService<UpdateService>(),
                 onExit: () => host.StopAsync(TimeSpan.FromSeconds(5)).GetAwaiter().GetResult(),
                 sendTestToast: SendTestToastAsync);
 

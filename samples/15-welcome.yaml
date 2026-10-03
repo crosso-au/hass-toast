@@ -39,7 +39,7 @@ data:
         src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/custom_components/hass_toast/brand/icon.png
         alt: HASS Windows Toast logo
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
       groups:
         - columns:
@@ -87,7 +87,7 @@ data:
         crop: circle
         alt: HASS Windows Toast logo
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
       # A full bar reads as "done". value_override replaces the percentage with a word.
       progress:
@@ -153,7 +153,7 @@ data:
         crop: circle
         alt: HASS Windows Toast logo
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
     inputs:
       - type: selection
@@ -243,7 +243,7 @@ data:
         crop: circle
         alt: HASS Windows Toast logo
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
       # How much of the day has gone, as a bar.
       progress:
@@ -340,7 +340,7 @@ sequence:
             crop: circle
             alt: HASS Windows Toast logo
           hero:
-            src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
             alt: HASS Windows Toast
           progress:
             title: HASS Windows Toast
@@ -402,7 +402,7 @@ data:
         crop: circle
         alt: HASS Windows Toast logo
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
       # The route it took, as three steps.
       groups:
@@ -464,7 +464,7 @@ data:
         crop: circle
         alt: HASS Windows Toast logo
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: CrossboxLabs
       # A numbered checklist: big numbers in a narrow column, the step beside each.
       groups:
@@ -513,7 +513,7 @@ data:
         - Rich notifications from Home Assistant, now on this PC.
       attribution: CrossboxLabs
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
     buttons:
       - content: See what it can do
@@ -621,7 +621,7 @@ sequence:
             crop: circle
             alt: HASS Windows Toast logo
           hero:
-            src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/MiniMax_H3_00001_20fps.gif
+            src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
             alt: CrossboxLabs
           groups:
             - columns:

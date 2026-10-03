@@ -53,7 +53,7 @@ data:
   data:
     visual:
       hero:
-        src: https://raw.githubusercontent.com/crosso-au/hass-toast/main/samples/images/hass-toast-hero.gif
+        src: https://raw.githubusercontent.com/crosso-au/hass-toast/refs/heads/main/samples/images/hass-toast-logo-reveal.gif
         alt: HASS Windows Toast
 
 ---
