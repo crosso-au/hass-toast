@@ -19,6 +19,7 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 
 from .const import CONF_DEVICE_ID, CONF_SIGNING_KEY, DOMAIN
 from .signing import decode_key
+from .targets import normalise_device_id
 
 
 def _key_error(value: str) -> str | None:
@@ -41,7 +42,9 @@ class HassToastConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            device_id = user_input[CONF_DEVICE_ID].strip()
+            # Lowercased, as the installer does, so the same machine cannot be added twice
+            # under different case.
+            device_id = normalise_device_id(user_input[CONF_DEVICE_ID])
             signing_key = user_input[CONF_SIGNING_KEY].strip()
 
             # The device id is how the agent decides an envelope is for it, so two entries

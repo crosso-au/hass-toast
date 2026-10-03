@@ -42,6 +42,7 @@ from .const import (
 from .payload import build_lifecycle_payload, build_toast
 from .service_schema import NOTIFY_SERVICE_SCHEMA
 from .signing import build_envelope, decode_key
+from .targets import normalise_device_id, pick_devices
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -140,18 +141,14 @@ def _resolve_targets(
         return chosen
 
     names = [target] if isinstance(target, str) else list(target)
-    resolved: list[HassToastDevice] = []
+    resolved, unknown = pick_devices(devices, names)
 
-    for name in names:
-        device = devices.get(name)
-        if device is None:
-            _LOGGER.warning(
-                "No HASS Windows Toast device named '%s' is configured; known devices: %s",
-                name,
-                ", ".join(sorted(devices)) or "(none)",
-            )
-            continue
-        resolved.append(device)
+    for name in unknown:
+        _LOGGER.warning(
+            "No HASS Windows Toast device named '%s' is configured; known devices: %s",
+            name,
+            ", ".join(sorted(devices)) or "(none)",
+        )
 
     return resolved
 
@@ -159,7 +156,9 @@ def _resolve_targets(
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up a configured Windows machine."""
     device = HassToastDevice(hass, entry)
-    _devices(hass)[device.device_id] = device
+    # Keyed case-insensitively, so a target matches whatever case it is written in. Entries
+    # added by hand before names were lowercased keep their stored name for signing.
+    _devices(hass)[normalise_device_id(device.device_id)] = device
 
     _register_services(hass)
 
@@ -170,7 +169,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Remove a configured machine, and the services once the last one goes."""
     devices = _devices(hass)
-    devices.pop(entry.data[CONF_DEVICE_ID], None)
+    devices.pop(normalise_device_id(entry.data[CONF_DEVICE_ID]), None)
 
     if not devices:
         hass.services.async_remove(NOTIFY_DOMAIN, DOMAIN)

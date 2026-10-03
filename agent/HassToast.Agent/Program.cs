@@ -531,7 +531,9 @@ internal static class Program
 
         var config = existing;
         config.HomeAssistant.Url = url;
-        config.DeviceId = deviceId;
+        // Lowercased, as the installer does. Names are not case-sensitive anywhere, and one stored
+        // form keeps the Home Assistant side from seeing the same machine as two.
+        config.DeviceId = deviceId.Trim().ToLowerInvariant();
 
         // Not prompted for. Both halves default to the same constant, so the only way they could
         // ever disagree was a person typing it into two places. It stays editable in config.json

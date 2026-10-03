@@ -135,7 +135,7 @@ and dashboards.
 | --- | --- | --- |
 | `message` | Yes | The main text. |
 | `title` | No | A bold line above the message. |
-| `target` | No | The device id of the computer to send to, or a list of them. Leave it out to send to every computer. |
+| `target` | No | The device id of the computer to send to, or a list of them. Upper or lower case both work. Leave it out to send to every computer. |
 | `tag` | No | Names the notification so it can be replaced, updated or removed later. |
 | `group` | No | Groups notifications so they can be removed together. |
 | `scenario` | No | `default`, `reminder`, `alarm`, `incomingCall` or `urgent`. |
@@ -289,7 +289,7 @@ exit.
 - Check notifications are on for the app under **Windows Settings → System → Notifications**. It
   is listed under its display name, which is **Home Assistant** unless you changed it.
 - Check Do Not Disturb (Windows 11) or Focus Assist (Windows 10) is off.
-- If `target` is set, check it matches the device id exactly.
+- If `target` is set, check it matches the device id. Case doesn't matter, but spelling does.
 - Right-click the tray icon and select **Send test toast**. If that works, the problem is on the
   Home Assistant side. Check **Settings → System → Logs** for `hass_toast`.
 
