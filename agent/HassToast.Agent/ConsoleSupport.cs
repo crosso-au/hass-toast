@@ -11,7 +11,8 @@ namespace HassToast.Agent;
 /// happened to find the caller's console.
 /// </para>
 /// <para>
-/// The cost is that tray mode inherits a console window, which <see cref="HideWindow"/> removes.
+/// The cost is that tray mode can be handed a console window, which <see cref="ReleaseConsole"/>
+/// gets rid of.
 /// </para>
 /// </summary>
 internal static class ConsoleSupport
@@ -21,21 +22,46 @@ internal static class ConsoleSupport
     [DllImport("kernel32.dll")]
     private static extern IntPtr GetConsoleWindow();
 
+    [DllImport("kernel32.dll")]
+    private static extern uint GetConsoleProcessList(uint[] processList, uint count);
+
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool FreeConsole();
+
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool ShowWindow(IntPtr window, int command);
 
     /// <summary>
-    /// Hides the console window for background tray operation.
+    /// Gets the console out of the way for background tray operation.
     /// <para>
-    /// Only the window is hidden, not freed — the process keeps its standard handles, so logging
-    /// and any diagnostic writes stay valid rather than failing against a closed handle.
+    /// A console created just for this process — a sign-in launch from the Run key, a toast
+    /// click — is detached from outright. Hiding it is not enough: with Windows Terminal as the
+    /// default terminal, the console window is a stand-in and hiding it leaves the Terminal tab
+    /// on screen. Standard output is pointed at nothing first, so a stray write cannot fail
+    /// against the closed handle. On Windows 11 24H2 and later the manifest's console policy
+    /// means there is usually no console here at all.
+    /// </para>
+    /// <para>
+    /// A console shared with a terminal the user ran the agent from is only hidden: that
+    /// terminal is theirs, and detaching would leave it waiting on a process it no longer sees.
     /// </para>
     /// </summary>
-    public static void HideWindow()
+    public static void ReleaseConsole()
     {
         var window = GetConsoleWindow();
-        if (window != IntPtr.Zero) ShowWindow(window, SwHide);
+        if (window == IntPtr.Zero) return;
+
+        if (GetConsoleProcessList(new uint[2], 2) <= 1)
+        {
+            Console.SetOut(TextWriter.Null);
+            Console.SetError(TextWriter.Null);
+            FreeConsole();
+            return;
+        }
+
+        ShowWindow(window, SwHide);
     }
 
     /// <summary>Reads a line without echoing it, for tokens and other secrets.</summary>

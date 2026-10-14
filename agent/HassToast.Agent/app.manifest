@@ -23,6 +23,11 @@
     <windowsSettings>
       <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
       <activeCodePage xmlns="http://schemas.microsoft.com/SMI/2019/WindowsSettings">UTF-8</activeCodePage>
+      <!-- Windows 11 24H2 and later: no console is created when nothing hands one down, so a
+           launch from the Run key, a toast click or the installer shows no window at all. Run
+           from a terminal, the CLI still inherits that terminal's console as before. Older
+           builds ignore this, and ConsoleSupport.ReleaseConsole covers them. -->
+      <consoleAllocationPolicy xmlns="http://schemas.microsoft.com/SMI/2024/WindowsSettings">detached</consoleAllocationPolicy>
     </windowsSettings>
   </application>
 

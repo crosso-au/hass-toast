@@ -219,7 +219,7 @@ internal static class Program
     private static int RunAgent()
     {
         // Tray mode runs in the background; the inherited console window would just be clutter.
-        ConsoleSupport.HideWindow();
+        ConsoleSupport.ReleaseConsole();
 
         ConfigureLogging();
 
